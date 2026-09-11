@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0c0c12"/>
+      <stop offset="1" stop-color="#07070a"/>
+    </linearGradient>
+
+    <radialGradient id="aurora" cx="0.62" cy="0.12" r="0.75">
+      <stop offset="0" stop-color="#7c6cff" stop-opacity="0.36"/>
+      <stop offset="0.55" stop-color="#7c6cff" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#7c6cff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#7c6cff" stop-opacity="0.55"/>
+      <stop offset="1" stop-color="#7c6cff" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="rail" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7e7e90"/>
+      <stop offset="0.26" stop-color="#2c2c36"/>
+      <stop offset="0.5" stop-color="#8b8b9c"/>
+      <stop offset="0.74" stop-color="#26262f"/>
+      <stop offset="1" stop-color="#5f5f6d"/>
+    </linearGradient>
+
+    <linearGradient id="screen" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fdfdff"/>
+      <stop offset="1" stop-color="#e9e7f6"/>
+    </linearGradient>
+
+    <linearGradient id="wordmark" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#c9c0ff"/>
+    </linearGradient>
+
+    <pattern id="grid" width="34" height="34" patternUnits="userSpaceOnUse">
+      <path d="M34 0H0V34" fill="none" stroke="#23232e" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ground)"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.5"/>
+  <rect width="1200" height="630" fill="url(#aurora)"/>
+
+  <!-- Text column -->
+  <g transform="translate(84, 150)">
+    <g>
+      <rect x="0" y="0" width="256" height="34" rx="17" fill="#ffffff" opacity="0.06"/>
+      <rect x="0.5" y="0.5" width="255" height="33" rx="16.5" fill="none" stroke="#ffffff" stroke-opacity="0.14"/>
+      <circle cx="20" cy="17" r="4" fill="#a99bff"/>
+      <text x="36" y="22" font-family="Inter, 'Noto Sans', sans-serif" font-size="14" font-weight="500"
+            fill="#9c9cb0" letter-spacing="0.6">Free · Runs in your browser</text>
+    </g>
+
+    <text y="112" font-family="'Inter Display', Inter, sans-serif" font-size="72" font-weight="700"
+          fill="url(#wordmark)" letter-spacing="-2.4">View your site</text>
+    <text y="190" font-family="'Inter Display', Inter, sans-serif" font-size="72" font-weight="700"
+          fill="url(#wordmark)" letter-spacing="-2.4">on the iPhone Duo</text>
+
+    <text y="244" font-family="Inter, 'Noto Sans', sans-serif" font-size="21" font-weight="400" fill="#8b8b9c">
+      Fold between the cover and inner displays, rotate,
+    </text>
+    <text y="276" font-family="Inter, 'Noto Sans', sans-serif" font-size="21" font-weight="400" fill="#8b8b9c">
+      and share the exact view. Fully interactive.
+    </text>
+
+    <g transform="translate(0, 318)" font-family="'DejaVu Sans Mono', monospace" font-size="14" fill="#7a7a8c">
+      <rect x="0" y="0" width="132" height="30" rx="8" fill="#ffffff" opacity="0.05"/>
+      <text x="16" y="20">466 × 678</text>
+      <rect x="144" y="0" width="132" height="30" rx="8" fill="#ffffff" opacity="0.05"/>
+      <text x="160" y="20">890 × 626</text>
+    </g>
+  </g>
+
+  <!-- Device: the open inner display, 890x626 at scale -->
+  <g transform="translate(915, 315)">
+    <ellipse cx="0" cy="30" rx="300" ry="230" fill="url(#glow)"/>
+    <g transform="translate(-201, -146)">
+      <rect x="0" y="0" width="402" height="292" rx="30" fill="#0e0e14"
+            stroke="url(#rail)" stroke-width="3"/>
+      <rect x="13" y="13" width="376" height="266" rx="18" fill="url(#screen)"/>
+
+      <!-- Hinge crease: dark and light hairlines, as in the app -->
+      <rect x="200" y="21" width="1" height="250" fill="#000" opacity="0.13"/>
+      <rect x="201" y="21" width="1" height="250" fill="#fff" opacity="0.5"/>
+
+      <!-- Suggestion of a page inside -->
+      <g fill="#c3c0d6">
+        <rect x="40" y="48" width="118" height="13" rx="6.5" fill="#5b48d8" opacity="0.85"/>
+        <rect x="40" y="80" width="140" height="8" rx="4"/>
+        <rect x="40" y="98" width="112" height="8" rx="4"/>
+        <rect x="228" y="48" width="130" height="88" rx="10" opacity="0.55"/>
+        <rect x="40" y="132" width="140" height="8" rx="4" opacity="0.7"/>
+        <rect x="40" y="150" width="96" height="8" rx="4" opacity="0.7"/>
+        <rect x="40" y="192" width="318" height="8" rx="4" opacity="0.45"/>
+        <rect x="40" y="210" width="286" height="8" rx="4" opacity="0.45"/>
+        <rect x="228" y="150" width="130" height="8" rx="4" opacity="0.45"/>
+        <rect x="228" y="168" width="98" height="8" rx="4" opacity="0.45"/>
+      </g>
+    </g>
+  </g>
+</svg>

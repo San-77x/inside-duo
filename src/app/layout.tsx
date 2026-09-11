@@ -12,10 +12,29 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const description =
+  "Load any URL inside a true-to-size iPhone Duo frame. Fold between the cover and inner displays, rotate, and share the exact view.";
+
+// Needed for og:image to resolve to an absolute URL. Override per environment rather than
+// editing this, so a preview deploy does not advertise the production host.
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://inside-duo.sidecraft.workers.dev";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "View on iPhone Duo",
-  description:
-    "Load any URL inside a true-to-size iPhone Duo frame. Fold between the cover and inner displays, rotate, and share the exact view.",
+  description,
+  openGraph: {
+    type: "website",
+    siteName: "View on iPhone Duo",
+    title: "View on iPhone Duo",
+    description,
+    url: "/",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "View on iPhone Duo",
+    description,
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
