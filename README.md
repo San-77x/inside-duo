@@ -69,6 +69,19 @@ Open the URL it prints (`http://localhost:3000` unless the port is taken).
 > it on Bun's runtime (`bun --bun next`) currently crashes, so the scripts deliberately
 > avoid the `--bun` flag.
 
+## Deploying to Cloudflare
+
+The app runs as a Cloudflare Worker via the OpenNext adapter.
+
+```bash
+bunx wrangler login     # once, opens a browser
+bun run deploy
+```
+
+`bun run preview:cf` runs the built Worker locally in the real Workers runtime, which is
+worth doing before any deploy — Workers is not Node, and the embeddability check takes a
+different code path there.
+
 ## Using it
 
 Enter a domain on the home page and you land in the viewer:
@@ -107,10 +120,15 @@ reports one of three outcomes:
   something the server cannot.
 
 Because that check fetches URLs supplied by anyone, it validates every redirect hop
-against loopback, private, link-local, and carrier-grade NAT ranges, and then connects to
-the address it just validated rather than resolving the name a second time — otherwise a
-short-TTL DNS record could answer the check with a public address and the request with an
-internal one. The endpoint is also rate limited per client.
+against loopback, private, link-local, and carrier-grade NAT ranges. The endpoint is also
+rate limited per client.
+
+On Node it additionally connects to the address it just validated rather than resolving
+the name a second time, so a short-TTL DNS record cannot answer the check with a public
+address and the request with an internal one. Cloudflare Workers cannot pin a connection
+that way, so the deployed Worker keeps the validation but not the pinning — acceptable
+there because the edge has no private network of yours to reach, and not something to
+copy back to a Node host.
 
 ### The fold animation
 
@@ -169,7 +187,7 @@ src/
 ## Built with
 
 Next.js 16 (App Router, Turbopack, Server Actions) · React 19 · TypeScript ·
-Tailwind CSS v4 · Bun
+Tailwind CSS v4 · Bun · Cloudflare Workers via OpenNext
 
 No UI component library and no icon package — the interface, the device frame, and every
 icon are written from scratch.

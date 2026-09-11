@@ -1,7 +1,13 @@
-import { lookup } from "node:dns/promises";
+import { resolve4, resolve6 } from "node:dns/promises";
 import http from "node:http";
 import https from "node:https";
 import net from "node:net";
+
+// Workers implements most of node:dns, but lookup() throws "Not implemented" there, and
+// it cannot honour the lookup hook that pins a connection. Everything below therefore
+// resolves with resolve4/resolve6, which both runtimes support, and pins only on Node.
+const ON_WORKERS =
+  typeof navigator !== "undefined" && navigator.userAgent === "Cloudflare-Workers";
 
 export type EmbedCheck =
   | { status: "ok" }
@@ -101,15 +107,21 @@ async function resolvePublicAddress(hostname: string): Promise<Pinned> {
     throw new Error("Target resolves to a private address");
   }
 
-  const records = await lookup(bare, { all: true, verbatim: true });
+  const [v4, v6] = await Promise.allSettled([resolve4(bare), resolve6(bare)]);
+  const records: Pinned[] = [
+    ...(v4.status === "fulfilled" ? v4.value.map((address) => ({ address, family: 4 as const })) : []),
+    ...(v6.status === "fulfilled" ? v6.value.map((address) => ({ address, family: 6 as const })) : []),
+  ];
+
   if (records.length === 0) throw new Error("Domain did not resolve");
 
+  // Every answer has to be public, not just the one we end up using: a name that returns
+  // both a public and an internal address must not be reachable through either.
   for (const record of records) {
     if (isPrivateAddress(record.address)) throw new Error("Target resolves to a private address");
   }
 
-  const chosen = records[0];
-  return { address: chosen.address, family: chosen.family === 4 ? 4 : 6 };
+  return records[0];
 }
 
 function readFrameAncestors(csp: string | null): string | null {
@@ -150,11 +162,35 @@ export function inspectHeaders(headers: Headers): EmbedCheck {
 
 type HeadResponse = { status: number; headers: Headers };
 
+function fetchHeaders(url: URL, pinned: Pinned): Promise<HeadResponse> {
+  return ON_WORKERS ? fetchHeadersOnWorkers(url) : fetchHeadersPinned(url, pinned);
+}
+
+// Workers cannot pin a connection to an address, so this path keeps the resolve-and-check
+// step and accepts that the name is resolved again at connect time. The edge has no
+// private network of ours to reach, which is what makes that acceptable there and not on
+// a Node host.
+async function fetchHeadersOnWorkers(url: URL): Promise<HeadResponse> {
+  const response = await fetch(url, {
+    method: "GET",
+    redirect: "manual",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+    headers: {
+      "user-agent":
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+      accept: "text/html,application/xhtml+xml",
+    },
+  });
+
+  await response.body?.cancel().catch(() => {});
+  return { status: response.status, headers: response.headers };
+}
+
 // Uses node:http rather than fetch because only this API lets the connection be pinned to
 // an address we already validated. `lookup` is handed the pinned result instead of asking
 // DNS again, while the URL still supplies Host and the TLS server name, so virtual hosts
 // and certificate validation behave normally.
-function fetchHeaders(url: URL, pinned: Pinned): Promise<HeadResponse> {
+function fetchHeadersPinned(url: URL, pinned: Pinned): Promise<HeadResponse> {
   const transport = url.protocol === "https:" ? https : http;
 
   return new Promise((resolve, reject) => {

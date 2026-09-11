@@ -73,6 +73,21 @@ hop** against loopback, private, link-local and CGNAT ranges using `redirect: "m
 plus an explicit hop loop. Switching to `redirect: "follow"` skips per-hop validation and
 reopens SSRF.
 
+**This file runs on two runtimes and the difference is deliberate.** It is deployed to
+Cloudflare Workers (OpenNext) but also runs under Node for `next dev`, `next build` and
+the tests:
+
+- Resolution uses `resolve4`/`resolve6`, not `lookup`. Workers implements most of
+  `node:dns` but `lookup`, `lookupService` and `resolve` throw "Not implemented" there.
+- On Node the connection is pinned to the validated address through `http.request`'s
+  `lookup` hook, closing the DNS-rebinding window. Workers cannot do this, so `ON_WORKERS`
+  selects a plain `fetch` path that keeps the validation without the pinning. Do not
+  "simplify" these into one branch — that silently downgrades the Node path.
+
+Deploy with `bun run deploy`; `bun run preview:cf` runs the built Worker in the real
+Workers runtime locally. Always exercise a preview before deploying, because a change
+that works under `next dev` can still break on Workers.
+
 ### Sizing invariant
 
 `src/lib/devices.ts` is the single source of truth for panel dimensions; the landing page

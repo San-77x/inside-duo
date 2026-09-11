@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "view-on-iphone-duo",
+  "main": ".open-next/worker.js",
+  // No account_id on purpose: wrangler uses whichever account you log in with, and asks
+  // if that login can reach more than one. Pin it here only to force a specific account.
+  "compatibility_date": "2024-12-30",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "view-on-iphone-duo"
+    }
+  ]
+}
