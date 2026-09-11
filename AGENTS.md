@@ -34,8 +34,13 @@ Node, which is the supported path — do not add `--bun` to the scripts.
 Do not run `npm install`; it creates a `package-lock.json` alongside `bun.lock` and the
 two drift. `npm run <script>` is harmless, but prefer `bun run`.
 
-No test framework is configured. `bun run lint` and `tsc --noEmit` are the only
-automated checks.
+Tests run on Bun's built-in runner (`bun test`), no framework configured. Coverage is
+currently limited to the address predicates in `src/lib/embeddable.test.ts`, which is the
+security-critical part; there are no component tests.
+
+**Address parsing is test-first.** `isPrivateAddress` is exported solely so the table in
+that test can reach it. Any change to the private-range logic needs a case added there —
+a textual-matching bug in this code is an SSRF hole, and one already shipped once.
 
 After adding or renaming a route, run `bun run build` (or `bunx next typegen`) before
 `tsc --noEmit` — `PageProps<"/route">` is generated, and typechecking fails until it

@@ -19,15 +19,65 @@ function isPrivateIpv4(ip: string): boolean {
   return a >= 224;
 }
 
+// Textual IPv6 has too many spellings to pattern-match: the URL parser rewrites
+// ::ffff:127.0.0.1 as ::ffff:7f00:1, and 0:0:0:0:0:0:0:1 means ::1. Expand to bytes
+// first so every spelling of an address reaches the same check.
+function ipv6Bytes(input: string): number[] | null {
+  const bare = input.toLowerCase().split("%")[0];
+  if (!net.isIPv6(bare)) return null;
+
+  const groupBytes = (part: string): number[] => {
+    if (!part) return [];
+    const out: number[] = [];
+    for (const group of part.split(":")) {
+      if (group.includes(".")) {
+        for (const octet of group.split(".")) out.push(Number(octet) & 0xff);
+      } else {
+        const value = parseInt(group, 16);
+        out.push((value >>> 8) & 0xff, value & 0xff);
+      }
+    }
+    return out;
+  };
+
+  const [head, tail] = bare.split("::");
+  const left = groupBytes(head);
+
+  if (tail === undefined) return left.length === 16 ? left : null;
+
+  const right = groupBytes(tail);
+  const fill = 16 - left.length - right.length;
+  if (fill < 0) return null;
+
+  return [...left, ...Array<number>(fill).fill(0), ...right];
+}
+
 function isPrivateIpv6(ip: string): boolean {
-  const addr = ip.toLowerCase().split("%")[0];
-  if (addr === "::" || addr === "::1") return true;
-  if (addr.startsWith("fc") || addr.startsWith("fd")) return true;
-  if (addr.startsWith("fe8") || addr.startsWith("fe9")) return true;
-  if (addr.startsWith("fea") || addr.startsWith("feb")) return true;
-  const mapped = addr.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
-  if (mapped) return isPrivateIpv4(mapped[1]);
+  const b = ipv6Bytes(ip);
+  if (b === null) return true; // unparseable: refuse rather than let it through
+
+  const zeros = (from: number, to: number) => b.slice(from, to).every((byte) => byte === 0);
+  const embeddedIpv4 = (from: number) => isPrivateIpv4(b.slice(from, from + 4).join("."));
+
+  if (zeros(0, 16)) return true; // ::
+  if (zeros(0, 15) && b[15] === 1) return true; // ::1
+  if ((b[0] & 0xfe) === 0xfc) return true; // fc00::/7 unique local
+  if (b[0] === 0xfe && (b[1] & 0xc0) === 0x80) return true; // fe80::/10 link local
+
+  // Anything carrying an IPv4 address is only as safe as the address it carries.
+  if (zeros(0, 10) && b[10] === 0xff && b[11] === 0xff) return embeddedIpv4(12); // ::ffff:0:0/96
+  if (zeros(0, 12)) return embeddedIpv4(12); // ::a.b.c.d, deprecated but still routed
+  if (b[0] === 0x00 && b[1] === 0x64 && b[2] === 0xff && b[3] === 0x9b && zeros(4, 12)) {
+    return embeddedIpv4(12); // 64:ff9b::/96 NAT64
+  }
+  if (b[0] === 0x20 && b[1] === 0x02) return embeddedIpv4(2); // 2002::/16 6to4
+
   return false;
+}
+
+/** Exported for tests. Anything that is not a parseable public address is private. */
+export function isPrivateAddress(ip: string): boolean {
+  return net.isIPv4(ip) ? isPrivateIpv4(ip) : isPrivateIpv6(ip);
 }
 
 // The server fetches URLs supplied by anyone on the internet, so every hop has to
@@ -36,8 +86,7 @@ async function assertPublicHost(hostname: string): Promise<void> {
   const bare = hostname.replace(/^\[|\]$/g, "");
 
   if (net.isIP(bare)) {
-    const isPrivate = net.isIPv4(bare) ? isPrivateIpv4(bare) : isPrivateIpv6(bare);
-    if (isPrivate) throw new Error("Target resolves to a private address");
+    if (isPrivateAddress(bare)) throw new Error("Target resolves to a private address");
     return;
   }
 
@@ -49,9 +98,7 @@ async function assertPublicHost(hostname: string): Promise<void> {
   if (records.length === 0) throw new Error("Domain did not resolve");
 
   for (const record of records) {
-    const isPrivate =
-      record.family === 4 ? isPrivateIpv4(record.address) : isPrivateIpv6(record.address);
-    if (isPrivate) throw new Error("Target resolves to a private address");
+    if (isPrivateAddress(record.address)) throw new Error("Target resolves to a private address");
   }
 }
 
