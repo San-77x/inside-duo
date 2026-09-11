@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="ground" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0d1020"/>
+      <stop offset="0.55" stop-color="#090b14"/>
+      <stop offset="1" stop-color="#06070d"/>
+    </linearGradient>
+
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.58">
+      <stop offset="0" stop-color="#5F80FA" stop-opacity="0.30"/>
+      <stop offset="0.5" stop-color="#5F80FA" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#5F80FA" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="corner" cx="0.08" cy="0.95" r="0.5">
+      <stop offset="0" stop-color="#7c6cff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#7c6cff" stop-opacity="0"/>
+    </radialGradient>
+
+    <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.72">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.62"/>
+    </radialGradient>
+
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#232a3f" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#ground)"/>
+  <rect width="1200" height="630" fill="url(#grid)" opacity="0.55"/>
+  <rect width="1200" height="630" fill="url(#halo)"/>
+  <rect width="1200" height="630" fill="url(#corner)"/>
+  <rect width="1200" height="630" fill="url(#vignette)"/>
+
+  <!-- Tagline sits below the wordmark, which is composited in afterwards. -->
+  <text x="600" y="428" text-anchor="middle"
+        font-family="Inter, 'Noto Sans', sans-serif" font-size="25" font-weight="400"
+        fill="#98a0bd">Preview any site on the 5.4&#8243; cover and 7.6&#8243; inner display</text>
+
+  <g transform="translate(600, 476)" font-family="'DejaVu Sans Mono', monospace" font-size="15" fill="#7e87a4">
+    <rect x="-148" y="0" width="140" height="32" rx="9" fill="#ffffff" opacity="0.05"/>
+    <text x="-78" y="21" text-anchor="middle">466 × 678</text>
+    <rect x="8" y="0" width="140" height="32" rx="9" fill="#ffffff" opacity="0.05"/>
+    <text x="78" y="21" text-anchor="middle">890 × 626</text>
+  </g>
+</svg>
