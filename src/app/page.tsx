@@ -1,69 +1,85 @@
-import Image from "next/image";
+import { UrlForm } from "@/components/UrlForm";
+import { Sparkle } from "@/components/icons";
+import { getMetrics } from "@/lib/devices";
+
+const single = getMetrics("single", "portrait");
+const extended = getMetrics("extended", "portrait");
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
+    <main className="relative flex flex-1 flex-col overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0 aurora" />
+      <div aria-hidden className="pointer-events-none absolute inset-0 studio-grid opacity-45" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0"
+        style={{ background: "radial-gradient(90% 75% at 50% 26%, transparent, var(--color-void) 100%)" }}
+      />
+
+      <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-20">
+        <div className="animate-rise flex flex-col items-center text-center">
+          <span className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-line bg-panel/60 px-3 py-1 text-xs text-muted backdrop-blur">
+            <Sparkle className="h-3 w-3 text-accent-soft" />
+            Free · No sign-up · Runs in your browser
+          </span>
+
+          <h1 className="max-w-3xl text-balance text-5xl font-semibold leading-[1.05] tracking-tight text-ink sm:text-6xl">
+            View your site on the{" "}
+            <span className="bg-gradient-to-br from-accent-soft to-accent bg-clip-text text-transparent">
+              iPhone Duo
+            </span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+
+          <p className="mt-5 max-w-lg text-pretty text-base leading-relaxed text-muted">
+            Load any URL inside a true-to-size device frame — fold it shut to the cover display,
+            open it to the 7.6&quot; inner screen, and rotate it. Fully interactive.
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        <div
+          className="animate-rise mt-10 flex w-full justify-center"
+          style={{ animationDelay: "90ms" }}
+        >
+          <UrlForm />
         </div>
-      </main>
+
+        <dl
+          className="animate-rise mt-16 grid grid-cols-1 gap-3 sm:grid-cols-3"
+          style={{ animationDelay: "180ms" }}
+        >
+          <Spec
+            term="Cover display"
+            value={`${single.viewportWidth} × ${single.viewportHeight}`}
+            note={`${single.diagonal}" folded`}
+          />
+          <Spec
+            term="Inner display"
+            value={`${extended.viewportWidth} × ${extended.viewportHeight}`}
+            note={`${extended.diagonal}" unfolded`}
+          />
+          <Spec term="Rendering" value="1:1 CSS pixels" note="Never upscaled" />
+        </dl>
+      </div>
+
+      <footer className="relative border-t border-line-soft px-6 py-5">
+        <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-2 text-xs text-faint sm:flex-row">
+          <p>
+            Pages load straight into your browser — they are never proxied or stored. The URL you
+            enter is sent to the server once, to check whether the site allows embedding.
+          </p>
+          <p className="shrink-0">View on iPhone Duo</p>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
+function Spec({ term, value, note }: { term: string; value: string; note: string }) {
+  return (
+    <div className="rounded-xl border border-line-soft bg-panel/40 px-5 py-4 text-center backdrop-blur-sm sm:text-left">
+      <dt className="text-xs text-faint">{term}</dt>
+      <dd className="mt-1 font-mono text-sm text-ink">{value}</dd>
+      <dd className="mt-0.5 text-xs text-faint">{note}</dd>
     </div>
   );
 }
