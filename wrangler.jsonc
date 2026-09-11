@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "duo",
+  "name": "inside-duo",
   "main": ".open-next/worker.js",
   // No account_id on purpose: wrangler uses whichever account you log in with, and asks
   // if that login can reach more than one. Pin it here only to force a specific account.
@@ -13,7 +13,7 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "duo"
+      "service": "inside-duo"
     }
   ]
 }
