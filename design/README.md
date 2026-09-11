@@ -1,13 +1,14 @@
 # Design sources
 
-`source/wordmark.png` is the supplied logo lockup: the fold mark plus "View on iPhone
-Duo", navy `#20262C` with `Duo` in blue `#5F80FA`, on transparency. Everything shipped is
-derived from it.
+`wordmark.png` is the supplied logo lockup: the fold mark plus "View on iPhone Duo", navy
+`#20262C` with `Duo` in blue `#5F80FA`, on transparency. Every shipped asset is derived
+from it — there is no second source.
 
-`source/icon-original.png` is the supplied icon artwork. It is **not** used. It is a dark,
-soft-edged render on black, so at 16px it collapses into an invisible smudge and
-auto-levelling it just blows out the glow. The icon instead crops the same mark out of the
-wordmark, where it is crisp and high contrast.
+A separate icon artwork was supplied and deliberately not used: a dark, soft-edged render
+on black that collapses into an invisible smudge at 16px, where auto-levelling only blows
+out the glow. The icon crops the same mark out of the wordmark instead, where it is crisp
+and high contrast. That file is not kept in the tree; recover it from git history if
+needed.
 
 ## Icons
 
@@ -16,7 +17,7 @@ lockup. The tile is rounded for the favicon and **square for the apple icon**, b
 applies its own mask and rounding it here would show a double-rounded edge.
 
 ```bash
-magick source/wordmark.png -fuzz 2% -trim +repage /tmp/wm.png
+magick wordmark.png -fuzz 2% -trim +repage /tmp/wm.png
 magick /tmp/wm.png -crop 340x323+0+0 +repage -fuzz 2% -trim +repage /tmp/mark.png
 magick /tmp/mark.png -fill white -colorize 100 /tmp/mark-white.png
 
