@@ -19,6 +19,9 @@ const SETTLE_MS = 390;
 
 export function useFoldAnimation(mode: FoldMode, commit: (next: FoldMode) => void) {
   const [state, setState] = useState<FoldState>(REST);
+  // `busy` guards re-entry synchronously; `animating` drives the UI. They are set and
+  // cleared together so the controls never look enabled while fold() is still refusing.
+  const [animating, setAnimating] = useState(false);
   const busy = useRef(false);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
@@ -43,6 +46,7 @@ export function useFoldAnimation(mode: FoldMode, commit: (next: FoldMode) => voi
       }
 
       busy.current = true;
+      setAnimating(true);
       clear();
 
       // The panel swaps size mid-swing, so the frosted pane covers the reflow and the
@@ -82,13 +86,12 @@ export function useFoldAnimation(mode: FoldMode, commit: (next: FoldMode) => voi
         setTimeout(() => {
           setState(REST);
           busy.current = false;
+          setAnimating(false);
         }, SWING_MS + SETTLE_MS + 20),
       );
     },
     [clear, commit, mode],
   );
 
-  const isAnimating = state.glass > 0 || state.rotation !== 0;
-
-  return { state, isAnimating, fold };
+  return { state, isAnimating: animating, fold };
 }

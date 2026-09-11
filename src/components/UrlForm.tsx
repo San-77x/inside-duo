@@ -5,7 +5,9 @@ import { useState, useTransition } from "react";
 import { ArrowRight, Spinner } from "@/components/icons";
 import { normalizeUrl } from "@/lib/url";
 
-const EXAMPLES = ["stripe.com", "vercel.com", "tailwindcss.com"];
+// Every entry must actually be embeddable — a suggestion that lands on the "refuses to
+// be embedded" dialog is a terrible first impression. Re-check before changing these.
+const EXAMPLES = ["tailwindcss.com", "en.wikipedia.org", "bun.sh"];
 
 export function UrlForm() {
   const router = useRouter();

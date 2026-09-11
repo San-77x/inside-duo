@@ -161,13 +161,10 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
 
         <span aria-hidden className="my-1 h-px w-7 bg-line" />
 
-        <div
-          className={`flex flex-col items-center gap-1 rounded-xl bg-white/[0.05] p-1 transition-opacity ${
-            isAnimating ? "pointer-events-none opacity-50" : ""
-          }`}
-        >
+        <div className="flex flex-col items-center gap-1 rounded-xl bg-white/[0.05] p-1">
           <SegmentButton
             active={mode === "single"}
+            disabled={isAnimating}
             onClick={() => requestFold("single")}
             label='Cover display — 5.4"'
           >
@@ -175,6 +172,7 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
           </SegmentButton>
           <SegmentButton
             active={mode === "extended"}
+            disabled={isAnimating}
             onClick={() => requestFold("extended")}
             label='Inner display — 7.6"'
           >
@@ -287,6 +285,12 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
                   onLoad={() => setLoading(false)}
                   onError={() => setLoading(false)}
                   referrerPolicy="no-referrer"
+                  // No sandbox, deliberately. Omitting allow-top-navigation would stop a
+                  // previewed page hijacking the tab, but the attribute breaks real sites
+                  // outright — en.wikipedia.org renders blank under any token set that
+                  // withholds top navigation — and it fails silently, which is the exact
+                  // blank-frame confusion this tool exists to remove. Faithful rendering
+                  // is the product; see the limitation noted in the README.
                   style={{
                     width: metrics.viewportWidth,
                     height: metrics.viewportHeight,
@@ -367,11 +371,13 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
 
 function SegmentButton({
   active,
+  disabled = false,
   onClick,
   label,
   children,
 }: {
   active: boolean;
+  disabled?: boolean;
   onClick: () => void;
   label: string;
   children: React.ReactNode;
@@ -380,10 +386,14 @@ function SegmentButton({
     <button
       type="button"
       onClick={onClick}
+      // A real disabled attribute, so the fold's own re-entry guard and what the user
+      // sees can never disagree, and assistive tech is told the control is unavailable.
+      disabled={disabled}
       title={label}
       aria-label={label}
       aria-pressed={active}
-      className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all ${
+      style={disabled && !active ? { opacity: 0.4 } : undefined}
+      className={`flex h-9 w-9 items-center justify-center rounded-lg transition-all disabled:cursor-not-allowed ${
         active
           ? "bg-white/[0.13] text-ink shadow-[0_1px_2px_rgba(0,0,0,0.5)] ring-1 ring-inset ring-white/10"
           : "text-faint hover:text-muted"
@@ -432,6 +442,54 @@ function BlockedDialog({
   onRetry: () => void;
 }) {
   const isBlocked = detail.kind === "blocked";
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  // aria-modal promises focus is inside the dialog, so it has to actually be put there,
+  // kept there while Tab cycles, and handed back to whatever opened it.
+  useEffect(() => {
+    const panel = panelRef.current;
+    if (!panel) return;
+
+    const previous = document.activeElement as HTMLElement | null;
+    const focusable = () =>
+      Array.from(
+        panel.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input, select, textarea, [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+
+    focusable()[0]?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onDismiss();
+        return;
+      }
+      if (event.key !== "Tab") return;
+
+      const items = focusable();
+      if (items.length === 0) return;
+
+      const first = items[0];
+      const last = items[items.length - 1];
+      const active = document.activeElement;
+
+      if (event.shiftKey && (active === first || !panel.contains(active))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && active === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      previous?.focus?.();
+    };
+  }, [onDismiss]);
 
   return (
     <div
@@ -440,7 +498,10 @@ function BlockedDialog({
       aria-labelledby="blocked-title"
       className="fixed inset-0 z-100 flex items-center justify-center bg-void/70 px-6 backdrop-blur-sm"
     >
-      <div className="animate-rise relative w-full max-w-md rounded-2xl border border-line bg-panel p-6 shadow-2xl">
+      <div
+        ref={panelRef}
+        className="animate-rise relative w-full max-w-md rounded-2xl border border-line bg-panel p-6 shadow-2xl"
+      >
         <button
           type="button"
           onClick={onDismiss}

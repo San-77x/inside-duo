@@ -1,4 +1,6 @@
 import { lookup } from "node:dns/promises";
+import http from "node:http";
+import https from "node:https";
 import net from "node:net";
 
 export type EmbedCheck =
@@ -80,14 +82,19 @@ export function isPrivateAddress(ip: string): boolean {
   return net.isIPv4(ip) ? isPrivateIpv4(ip) : isPrivateIpv6(ip);
 }
 
-// The server fetches URLs supplied by anyone on the internet, so every hop has to
-// be re-checked against internal address space — not just the first one.
-async function assertPublicHost(hostname: string): Promise<void> {
+type Pinned = { address: string; family: 4 | 6 };
+
+// The server fetches URLs supplied by anyone on the internet, so every hop is checked
+// against internal address space — not just the first. The address that passed is
+// returned so the connection can be pinned to it: re-resolving the name at connect time
+// would let a short-TTL record answer the check with a public IP and the fetch with an
+// internal one.
+async function resolvePublicAddress(hostname: string): Promise<Pinned> {
   const bare = hostname.replace(/^\[|\]$/g, "");
 
   if (net.isIP(bare)) {
     if (isPrivateAddress(bare)) throw new Error("Target resolves to a private address");
-    return;
+    return { address: bare, family: net.isIPv4(bare) ? 4 : 6 };
   }
 
   if (bare === "localhost" || bare.endsWith(".localhost") || bare.endsWith(".internal")) {
@@ -100,6 +107,9 @@ async function assertPublicHost(hostname: string): Promise<void> {
   for (const record of records) {
     if (isPrivateAddress(record.address)) throw new Error("Target resolves to a private address");
   }
+
+  const chosen = records[0];
+  return { address: chosen.address, family: chosen.family === 4 ? 4 : 6 };
 }
 
 function readFrameAncestors(csp: string | null): string | null {
@@ -113,11 +123,15 @@ function readFrameAncestors(csp: string | null): string | null {
   return null;
 }
 
-function inspectHeaders(headers: Headers): EmbedCheck {
+/** Exported for tests. */
+export function inspectHeaders(headers: Headers): EmbedCheck {
   const xfo = headers.get("x-frame-options");
   if (xfo) {
-    const value = xfo.trim().toUpperCase();
-    if (value.includes("DENY") || value.includes("SAMEORIGIN") || value.includes("ALLOW-FROM")) {
+    // Compare the directive itself, not the whole value: ALLOW-FROM is ignored by every
+    // current browser, so such a page really does frame, and a substring test would also
+    // misread "ALLOW-FROM https://sameorigin.example" as SAMEORIGIN.
+    const directive = xfo.trim().toUpperCase().split(/[\s,]+/)[0];
+    if (directive === "DENY" || directive === "SAMEORIGIN") {
       return { status: "blocked", header: "X-Frame-Options", value: xfo.trim() };
     }
   }
@@ -134,6 +148,52 @@ function inspectHeaders(headers: Headers): EmbedCheck {
   return { status: "ok" };
 }
 
+type HeadResponse = { status: number; headers: Headers };
+
+// Uses node:http rather than fetch because only this API lets the connection be pinned to
+// an address we already validated. `lookup` is handed the pinned result instead of asking
+// DNS again, while the URL still supplies Host and the TLS server name, so virtual hosts
+// and certificate validation behave normally.
+function fetchHeaders(url: URL, pinned: Pinned): Promise<HeadResponse> {
+  const transport = url.protocol === "https:" ? https : http;
+
+  return new Promise((resolve, reject) => {
+    const request = transport.request(
+      url,
+      {
+        method: "GET",
+        headers: {
+          "user-agent":
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
+          accept: "text/html,application/xhtml+xml",
+        },
+        lookup: (_hostname, options, callback) => {
+          if (typeof options === "object" && options?.all) {
+            callback(null, [{ address: pinned.address, family: pinned.family }]);
+          } else {
+            callback(null, pinned.address, pinned.family);
+          }
+        },
+      },
+      (response) => {
+        const headers = new Headers();
+        for (const [name, value] of Object.entries(response.headers)) {
+          if (Array.isArray(value)) value.forEach((entry) => headers.append(name, entry));
+          else if (value !== undefined) headers.set(name, value);
+        }
+
+        // Only the headers matter, so drop the body rather than buffering a whole page.
+        response.destroy();
+        resolve({ status: response.statusCode ?? 0, headers });
+      },
+    );
+
+    request.setTimeout(TIMEOUT_MS, () => request.destroy(new Error("Timed out")));
+    request.on("error", reject);
+    request.end();
+  });
+}
+
 export async function inspectEmbeddability(rawUrl: string): Promise<EmbedCheck> {
   let current: URL;
   try {
@@ -147,29 +207,19 @@ export async function inspectEmbeddability(rawUrl: string): Promise<EmbedCheck> 
   }
 
   for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
+    let pinned: Pinned;
     try {
-      await assertPublicHost(current.hostname);
+      pinned = await resolvePublicAddress(current.hostname);
     } catch {
       return { status: "unreachable", reason: "That address couldn't be reached." };
     }
 
-    let response: Response;
+    let response: HeadResponse;
     try {
-      response = await fetch(current, {
-        method: "GET",
-        redirect: "manual",
-        signal: AbortSignal.timeout(TIMEOUT_MS),
-        headers: {
-          "user-agent":
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
-          accept: "text/html,application/xhtml+xml",
-        },
-      });
+      response = await fetchHeaders(current, pinned);
     } catch {
       return { status: "unreachable", reason: "That site didn't respond in time." };
     }
-
-    response.body?.cancel();
 
     const location = response.headers.get("location");
     if (response.status >= 300 && response.status < 400 && location) {

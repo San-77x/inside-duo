@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { isPrivateAddress } from "./embeddable";
+import { inspectHeaders, isPrivateAddress } from "./embeddable";
 
 // The URL parser rewrites addresses before they reach us — ::ffff:127.0.0.1 arrives as
 // ::ffff:7f00:1 — so each address is listed in the spellings it can actually arrive in.
@@ -62,5 +62,41 @@ describe("isPrivateAddress", () => {
     for (const junk of ["", "not-an-ip", "999.999.999.999", "::gggg", "127.0.0.1.1"]) {
       expect(isPrivateAddress(junk)).toBe(true);
     }
+  });
+});
+
+describe("inspectHeaders", () => {
+  const check = (headers: Record<string, string>) => inspectHeaders(new Headers(headers));
+
+  test("allows a response with no framing headers", () => {
+    expect(check({}).status).toBe("ok");
+  });
+
+  test.each([
+    ["deny", "blocked"],
+    ["DENY", "blocked"],
+    ["  SameOrigin  ", "blocked"],
+    // Ignored by every current browser, so the page really does frame.
+    ["ALLOW-FROM https://partner.example", "ok"],
+    // Must not be misread as SAMEORIGIN by a substring test.
+    ["ALLOW-FROM https://sameorigin.example", "ok"],
+  ] as const)("x-frame-options %p -> %s", (value, expected) => {
+    expect(check({ "x-frame-options": value }).status).toBe(expected);
+  });
+
+  test.each([
+    ["frame-ancestors 'none'", "blocked"],
+    ["frame-ancestors 'self'", "blocked"],
+    ["default-src 'self'; frame-ancestors 'self' https://partner.example", "blocked"],
+    ["frame-ancestors *", "ok"],
+    ["frame-ancestors https:", "ok"],
+    ["default-src 'self'; script-src 'unsafe-inline'", "ok"],
+  ] as const)("csp %p -> %s", (value, expected) => {
+    expect(check({ "content-security-policy": value }).status).toBe(expected);
+  });
+
+  test("reports the header responsible so the dialog can quote it", () => {
+    const result = check({ "x-frame-options": "deny" });
+    expect(result).toMatchObject({ header: "X-Frame-Options", value: "deny" });
   });
 });

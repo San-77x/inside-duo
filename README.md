@@ -63,6 +63,7 @@ Open the URL it prints (`http://localhost:3000` unless the port is taken).
 | `bun run build` | Production build |
 | `bun run start` | Serve the production build |
 | `bun run lint` | ESLint, including React Compiler rules |
+| `bun run test` | Unit tests on Bun's built-in runner |
 
 > Bun is the package manager and script runner, but Next.js itself runs on Node. Running
 > it on Bun's runtime (`bun --bun next`) currently crashes, so the scripts deliberately
@@ -106,8 +107,10 @@ reports one of three outcomes:
   something the server cannot.
 
 Because that check fetches URLs supplied by anyone, it validates every redirect hop
-against loopback, private, link-local, and carrier-grade NAT address ranges, so it can't
-be used as a probe into internal networks.
+against loopback, private, link-local, and carrier-grade NAT ranges, and then connects to
+the address it just validated rather than resolving the name a second time — otherwise a
+short-TTL DNS record could answer the check with a public address and the request with an
+internal one. The endpoint is also rate limited per client.
 
 ### The fold animation
 
@@ -129,6 +132,11 @@ These are inherent to previewing live sites in a browser, not bugs:
   browser.
 - **No device pixel ratio emulation.** Layout is accurate; image `srcset` selection for a
   high-DPI screen is not.
+- **The previewed page can navigate the whole tab.** Once you click inside the frame, the
+  site in it is able to replace the page you are viewing it from. An iframe `sandbox`
+  would prevent this, but it breaks real sites outright — Wikipedia renders blank under
+  it — so it is deliberately not used. Treat a `/preview` link from someone else with the
+  same caution as any link they send you.
 
 ## Privacy
 
