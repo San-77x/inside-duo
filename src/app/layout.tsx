@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -37,13 +38,27 @@ export const metadata: Metadata = {
   },
 };
 
+// Cloudflare Web Analytics. Public by design — it is visible in the page source — so it
+// lives in .env.local rather than a secret store. Absent token means no script at all,
+// which keeps local development and forks free of any beacon.
+const beaconToken = process.env.NEXT_PUBLIC_CF_BEACON_TOKEN;
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        {beaconToken && (
+          <Script
+            src="https://static.cloudflareinsights.com/beacon.min.js"
+            strategy="afterInteractive"
+            data-cf-beacon={JSON.stringify({ token: beaconToken })}
+          />
+        )}
+      </body>
     </html>
   );
 }

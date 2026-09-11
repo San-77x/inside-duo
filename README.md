@@ -33,7 +33,8 @@ rewritten, and never stored.
   exact HTTP header responsible, instead of showing a mysterious blank rectangle.
 - **Live readout.** Current viewport dimensions, panel size, and zoom level are always
   visible beneath the device.
-- **No sign-up, no tracking, no storage.**
+- **No sign-up, no cookies, no accounts.** A cookieless page-view counter is the only
+  measurement; nothing identifies you or follows you across sites.
 
 ## Device specifications
 
@@ -160,8 +161,12 @@ These are inherent to previewing live sites in a browser, not bugs:
 
 Page content is loaded directly by your browser and never touches the server. The only
 thing sent to the server is the URL itself, once, so the embeddability check can read its
-response headers. Nothing is logged to a database, and there are no accounts, cookies, or
-analytics.
+response headers. Nothing is logged to a database and there are no accounts.
+
+Visits are counted with Cloudflare Web Analytics, which is cookieless: it records a page
+view, a referrer and a country, and does not set cookies, fingerprint the browser, or
+follow anyone between sites. Remove `NEXT_PUBLIC_CF_BEACON_TOKEN` and the script is not
+served at all.
 
 ## Project structure
 
