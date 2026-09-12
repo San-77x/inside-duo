@@ -1,5 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
+  // Worker name and the URL it serves at. Forks must change this and the matching
+  // WORKER_SELF_REFERENCE below, or a deploy will target someone else's Worker name.
   "name": "inside-duo",
   "main": ".open-next/worker.js",
   // No account_id on purpose: wrangler uses whichever account you log in with, and asks

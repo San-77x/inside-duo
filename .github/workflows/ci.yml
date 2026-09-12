@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # Next.js runs on Node even though Bun drives the scripts; `bun --bun next`
+      # segfaults, so the Node toolchain has to be present.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: bun install --frozen-lockfile
+
+      - run: bun test
+
+      - run: bun run lint
+
+      # Typed routes are generated during the build, so this has to run before tsc.
+      - run: bun run build
+
+      - run: bunx tsc --noEmit

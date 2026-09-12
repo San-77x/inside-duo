@@ -1,8 +1,16 @@
 # View on iPhone Duo
 
-Load any website inside a true-to-size iPhone Duo device frame and interact with it
-exactly as you would on the real hardware — fold it shut to the cover display, open it to
-the inner display, rotate it, and share a link that restores the exact view.
+Load any website inside a true-to-size foldable device frame and interact with it exactly
+as you would on the real hardware — fold it shut to the cover display, open it to the
+inner display, rotate it, and share a link that restores the exact view.
+
+**[Try it →](https://inside-duo.sidecraft.workers.dev)**
+
+![Licence](https://img.shields.io/badge/licence-MIT-blue)
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![Cloudflare Workers](https://img.shields.io/badge/Cloudflare-Workers-f38020)
+
+![View on iPhone Duo](src/app/opengraph-image.jpg)
 
 ---
 
@@ -196,3 +204,24 @@ Tailwind CSS v4 · Bun · Cloudflare Workers via OpenNext
 
 No UI component library and no icon package — the interface, the device frame, and every
 icon are written from scratch.
+
+## Contributing
+
+Issues and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md) for setup,
+the checks CI runs, and the handful of invariants that will fail review.
+
+Security reports go through [SECURITY.md](SECURITY.md) rather than a public issue. The
+URL-checking endpoint is the part worth attacking, and its defences and known limits are
+documented there.
+
+## Licence
+
+[MIT](LICENSE) for the source code.
+
+The brand assets — the logo in `design/` and the icon and OpenGraph image derived from it
+— are excluded. Forks should ship their own artwork.
+
+## Trademark
+
+Not affiliated with, endorsed by, or sponsored by Apple Inc. "iPhone" is a trademark of
+Apple Inc., used here only to describe the device dimensions this tool reproduces.

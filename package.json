@@ -1,6 +1,24 @@
 {
   "name": "view-on-iphone-duo",
   "version": "0.1.0",
+  "description": "Preview any website at true-to-size foldable dimensions, on a 5.4-inch cover display and a 7.6-inch inner display.",
+  "license": "MIT",
+  "author": "S4N33N",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/San-77x/view-on-iphone-duo.git"
+  },
+  "homepage": "https://inside-duo.sidecraft.workers.dev",
+  "bugs": {
+    "url": "https://github.com/San-77x/view-on-iphone-duo/issues"
+  },
+  "keywords": [
+    "foldable",
+    "responsive-design",
+    "device-preview",
+    "nextjs",
+    "cloudflare-workers"
+  ],
   "private": true,
   "scripts": {
     "dev": "next dev",

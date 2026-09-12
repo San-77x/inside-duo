@@ -46,3 +46,6 @@ next-env.d.ts
 .open-next
 .wrangler
 cloudflare-env.d.ts
+
+# local editor/agent tooling
+.claude/
