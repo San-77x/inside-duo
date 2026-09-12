@@ -35,7 +35,7 @@ type Props = {
 };
 
 const STAGE_PADDING = 96;
-const REPO_URL = "https://github.com/San-77x/view-on-iphone-duo";
+const REPO_URL = "https://github.com/San-77x/inside-duo";
 const CONTACT_URL = "https://san-77x.vercel.app/#contact";
 
 export function PreviewStage({ url, initialMode, initialOrientation }: Props) {

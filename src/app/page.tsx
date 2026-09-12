@@ -5,7 +5,7 @@ import { getMetrics } from "@/lib/devices";
 const single = getMetrics("single", "portrait");
 const extended = getMetrics("extended", "portrait");
 
-const REPO_URL = "https://github.com/San-77x/view-on-iphone-duo";
+const REPO_URL = "https://github.com/San-77x/inside-duo";
 const PORTFOLIO_URL = "https://san-77x.vercel.app";
 const CONTACT_URL = "https://san-77x.vercel.app/#contact";
 

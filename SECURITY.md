@@ -3,7 +3,7 @@
 ## Reporting a vulnerability
 
 Please report privately rather than opening a public issue: use
-[GitHub's private vulnerability reporting](https://github.com/San-77x/view-on-iphone-duo/security/advisories/new)
+[GitHub's private vulnerability reporting](https://github.com/San-77x/inside-duo/security/advisories/new)
 on this repository.
 
 Include what you did, what happened, and what you expected. A proof of concept helps but
