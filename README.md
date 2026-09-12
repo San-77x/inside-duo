@@ -219,7 +219,7 @@ documented there.
 [MIT](LICENSE) for the source code.
 
 The brand assets — the logo in `design/` and the icon and OpenGraph image derived from it
-— are excluded. Forks should ship their own artwork.
+— are excluded; see [NOTICE](NOTICE). Forks should ship their own artwork.
 
 ## Trademark
 

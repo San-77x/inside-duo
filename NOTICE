@@ -1,0 +1,10 @@
+The MIT licence in LICENSE covers the source code of this project.
+
+It does not cover the brand assets: the logo lockup in design/, and the icon and
+OpenGraph image derived from it in src/app/. Those remain the property of the copyright
+holder. Forks should replace them with their own artwork rather than shipping this
+project's identity under a different name.
+
+"iPhone" is a trademark of Apple Inc. This project is not affiliated with, endorsed by,
+or sponsored by Apple Inc., and uses the name only to describe the device dimensions it
+reproduces.
