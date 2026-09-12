@@ -8,6 +8,8 @@ import { DeviceFrame } from "@/components/DeviceFrame";
 import { useFoldAnimation } from "@/components/useFoldAnimation";
 import {
   ArrowLeft,
+  ArrowRight,
+  GitHub,
   Check,
   Close,
   Globe,
@@ -33,6 +35,8 @@ type Props = {
 };
 
 const STAGE_PADDING = 96;
+const REPO_URL = "https://github.com/San-77x/view-on-iphone-duo";
+const CONTACT_URL = "https://san-77x.vercel.app/#contact";
 
 export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
   const router = useRouter();
@@ -197,6 +201,17 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
         <ToolButton onClick={copyLink} label="Copy shareable link">
           {copied ? <Check className="h-4 w-4 text-emerald-400" /> : <LinkIcon />}
         </ToolButton>
+
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          title="Source on GitHub"
+          className="mt-auto flex h-10 w-10 items-center justify-center rounded-xl text-faint transition-colors hover:bg-white/5 hover:text-ink"
+        >
+          <GitHub className="h-[18px] w-[18px]" />
+          <span className="sr-only">Source on GitHub</span>
+        </a>
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col bg-stage">
@@ -350,6 +365,29 @@ export function PreviewStage({ url, initialMode, initialOrientation }: Props) {
             Link copied
           </div>
         )}
+
+        {/* Sits in the corner rather than over the stage: this is the working surface,
+            and the pitch lands best next to a layout the visitor is already judging. */}
+        <a
+          href={CONTACT_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="group absolute bottom-5 right-5 z-40 hidden max-w-[15rem] items-center gap-3 rounded-xl border border-accent/30 bg-panel/80 py-2.5 pl-3.5 pr-3 backdrop-blur-xl transition-colors hover:border-accent/60 hover:bg-panel lg:flex"
+        >
+          <span className="relative flex h-2 w-2 shrink-0">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-70" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-400" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-xs font-medium leading-tight text-ink">
+              Doesn&apos;t look right?
+            </span>
+            <span className="block text-[11px] leading-tight text-muted">
+              I build responsive front-ends
+            </span>
+          </span>
+          <ArrowRight className="h-3.5 w-3.5 shrink-0 text-accent-soft transition-transform group-hover:translate-x-0.5" />
+        </a>
         </div>
       </div>
 

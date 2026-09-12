@@ -1,13 +1,17 @@
 import { UrlForm } from "@/components/UrlForm";
-import { Sparkle } from "@/components/icons";
+import { ArrowRight, GitHub, Sparkle } from "@/components/icons";
 import { getMetrics } from "@/lib/devices";
 
 const single = getMetrics("single", "portrait");
 const extended = getMetrics("extended", "portrait");
 
+const REPO_URL = "https://github.com/San-77x/view-on-iphone-duo";
+const PORTFOLIO_URL = "https://san-77x.vercel.app";
+const CONTACT_URL = "https://san-77x.vercel.app/#contact";
+
 export default function Home() {
   return (
-    <main className="relative flex flex-1 flex-col overflow-hidden">
+    <main className="relative flex flex-1 flex-col">
       <div aria-hidden className="pointer-events-none absolute inset-0 aurora" />
       <div aria-hidden className="pointer-events-none absolute inset-0 studio-grid opacity-45" />
       <div
@@ -16,7 +20,20 @@ export default function Home() {
         style={{ background: "radial-gradient(90% 75% at 50% 26%, transparent, var(--color-void) 100%)" }}
       />
 
-      <div className="relative flex flex-1 flex-col items-center justify-center px-6 py-20">
+      <header className="relative flex items-center justify-end px-6 py-5">
+        <a
+          href={REPO_URL}
+          target="_blank"
+          rel="noreferrer noopener"
+          title="Source on GitHub"
+          className="flex h-9 items-center gap-2 rounded-lg border border-line-soft bg-panel/50 px-3 text-xs text-muted backdrop-blur transition-colors hover:border-line hover:text-ink"
+        >
+          <GitHub className="h-4 w-4" />
+          <span className="hidden sm:inline">Source</span>
+        </a>
+      </header>
+
+      <div className="relative flex flex-1 flex-col items-center px-6 pb-24 pt-6 sm:pt-12">
         <div className="animate-rise flex flex-col items-center text-center">
           <span className="mb-7 inline-flex items-center gap-1.5 rounded-full border border-line bg-panel/60 px-3 py-1 text-xs text-muted backdrop-blur">
             <Sparkle className="h-3 w-3 text-accent-soft" />
@@ -59,6 +76,62 @@ export default function Home() {
           />
           <Spec term="Rendering" value="1:1 CSS pixels" note="Never upscaled" />
         </dl>
+
+        <section
+          className="animate-rise mt-20 w-full max-w-3xl"
+          style={{ animationDelay: "260ms" }}
+        >
+          <div className="relative overflow-hidden rounded-3xl border border-accent/30 bg-gradient-to-br from-accent/[0.18] via-panel/70 to-panel/40 p-8 backdrop-blur-xl sm:p-11">
+            <div
+              aria-hidden
+              className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full"
+              style={{
+                background:
+                  "radial-gradient(circle, color-mix(in srgb, var(--color-accent) 40%, transparent), transparent 70%)",
+              }}
+            />
+
+            <div className="relative">
+              <span className="inline-flex items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-3 py-1 text-[11px] font-medium uppercase tracking-wider text-emerald-300">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                </span>
+                Available for work
+              </span>
+
+              <h2 className="mt-5 text-balance text-3xl font-semibold leading-tight tracking-tight text-ink sm:text-4xl">
+                Need a site that holds up on every screen?
+              </h2>
+
+              <p className="mt-4 max-w-xl text-pretty text-base leading-relaxed text-muted">
+                I design and build fast, responsive front-ends — this tool included. If the
+                preview above showed you something you&apos;d rather not ship, that is exactly
+                the kind of thing I fix.
+              </p>
+
+              <div className="mt-7 flex flex-wrap items-center gap-4">
+                <a
+                  href={CONTACT_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="group inline-flex h-12 items-center gap-2 rounded-xl bg-ink px-6 text-sm font-semibold text-void transition-colors hover:bg-white"
+                >
+                  Work with me
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+                </a>
+                <a
+                  href={PORTFOLIO_URL}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="inline-flex h-12 items-center rounded-xl border border-line px-5 text-sm font-medium text-muted transition-colors hover:border-faint hover:text-ink"
+                >
+                  See my work
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
       <footer className="relative border-t border-line-soft px-6 py-5">
